@@ -10,33 +10,55 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.engine.particle.LakeParticleProvider;
 import com.engine.particle.Particle;
+import com.engine.particle.StreamParticleProvider;
 import com.engine.texture.TriangleTextureProvider;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
-import static com.engine.Const.*;
+import static com.engine.Const.P_RADIUS;
+import static com.engine.Const.subSteps;
 
 public class Simulation extends ApplicationAdapter implements InputProcessor {
 
-    private final Provider<List<Particle>> initialStateProvider = new LakeParticleProvider(50);
+    private Provider<List<Particle>> streamProvider;
     private SpriteBatch batch;
     private Texture texture;
     private Solver solver;
 
     @Override
     public void create() {
+        this.streamProvider = new StreamParticleProvider();
         this.batch = new SpriteBatch();
         this.texture = new TriangleTextureProvider().provide();
         this.solver = new Solver(subSteps);
+        this.solver.addParticles(new LakeParticleProvider(20).provide());
         Gdx.input.setInputProcessor(this);
-
-        this.solver.addParticles(this.initialStateProvider.provide());
+        Executors.newSingleThreadExecutor().submit(this::displayMetadata);
     }
 
     @Override
     public void render() {
+        streamParticles();
         this.solver.update();
         draw();
+    }
+
+    private void streamParticles() {
+        if (this.solver.size() > Const.particles) return;
+        this.solver.addParticles(this.streamProvider.provide());
+    }
+
+    private void displayMetadata() {
+        try {
+            TimeUnit.SECONDS.sleep(2);
+        } catch (InterruptedException ignored) {
+            //Ignored
+        } finally {
+            System.out.println(Gdx.graphics.getFramesPerSecond() + " | " + this.solver.size());
+        }
+        displayMetadata();
     }
 
 
@@ -61,6 +83,7 @@ public class Simulation extends ApplicationAdapter implements InputProcessor {
     public void dispose() {
         this.batch.dispose();
         this.texture.dispose();
+        this.solver.dispose();
     }
 
     @Override
@@ -80,7 +103,18 @@ public class Simulation extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        this.solver.click(new Vector2(screenX, Gdx.graphics.getHeight() - screenY), button);
+        Vector2 center = new Vector2(screenX, Gdx.graphics.getHeight() - screenY);
+        List<Particle> particles = this.solver.getParticles();
+        if (button == 0) {
+            for (Particle p : particles) {
+                Vector2 acc = center.cpy().sub(p.getPosition()).setLength(10 / p.getPosition().dst(center));
+                p.getPrevPosition().add(acc.scl(-1));
+            }
+        } else if (button == 1)
+            for (Particle p : particles) {
+                Vector2 acc = center.cpy().sub(p.getPosition()).setLength(10 / p.getPosition().dst(center));
+                p.getPrevPosition().add(acc);
+            }
         return false;
     }
 

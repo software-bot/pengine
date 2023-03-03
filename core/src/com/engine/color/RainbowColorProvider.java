@@ -1,7 +1,6 @@
 package com.engine.color;
 
 import com.badlogic.gdx.graphics.Color;
-import com.engine.Provider;
 
 public class RainbowColorProvider extends ChangingColorProvider {
 
@@ -14,6 +13,6 @@ public class RainbowColorProvider extends ChangingColorProvider {
                 new Color(1, 1, 0, 1f),
                 new Color(1f, 127f / 255f, 0f, 1f),
                 new Color(1f, 0f, 0f, 1f)
-        }, 0.0005f);
+        }, 0.0001f);
     }
 }
