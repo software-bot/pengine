@@ -5,11 +5,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Subscriber implements Runnable {
-    private final LinkedBlockingQueue<CollisionJob> eventBus;
+    private final LinkedBlockingQueue<ParticleStepJob> eventBus;
     private volatile boolean isSubscribed = true;
     private final AtomicInteger responseCounter;
 
-    public Subscriber(LinkedBlockingQueue<CollisionJob> collisionPipeline, AtomicInteger responseCounter) {
+    public Subscriber(LinkedBlockingQueue<ParticleStepJob> collisionPipeline, AtomicInteger responseCounter) {
         this.eventBus = collisionPipeline;
         this.responseCounter = responseCounter;
     }
@@ -18,9 +18,9 @@ public class Subscriber implements Runnable {
     public void run() {
         while (isSubscribed) {
             try {
-                CollisionJob job = eventBus.poll(10, TimeUnit.SECONDS);
+                ParticleStepJob job = eventBus.poll(10, TimeUnit.SECONDS);
                 if (job != null) {
-                    job.solveCollisions();
+                    job.stepParticles();
                     this.responseCounter.incrementAndGet();
                 }
             } catch (InterruptedException e) {

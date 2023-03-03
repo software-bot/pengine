@@ -24,7 +24,7 @@ public class StreamParticleProvider implements Provider<List<Particle>> {
         this(
                 new Vector2(P_RADIUS << 1, Gdx.graphics.getHeight() - (P_RADIUS)),
                 new Vector2(0.8f, -0.5f),
-                4,
+                6,
                 new RainbowColorProvider()
         );
     }
@@ -40,7 +40,7 @@ public class StreamParticleProvider implements Provider<List<Particle>> {
     @Override
     public List<Particle> provide() {
         List<Particle> particles = new ArrayList<>();
-        if (this.frames > 500 && this.frames % this.streamFrames == 0) {
+        if (this.frames > 1500 && this.frames % this.streamFrames == 0) {
             for (int i = 1; i <= pipes; i++) {
                 Vector2 center = this.position.cpy();
                 center.y -= i * (P_RADIUS << 1);
@@ -51,7 +51,7 @@ public class StreamParticleProvider implements Provider<List<Particle>> {
             }
         }
         this.frames++;
-        if (frames % 500 == 0) pipes++;
+        if (frames % 200 == 0) pipes++;
         return particles;
     }
 }

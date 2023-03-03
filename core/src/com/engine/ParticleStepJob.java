@@ -7,7 +7,7 @@ import com.engine.particle.Particle;
 
 import java.util.List;
 
-public class CollisionJob {
+public class ParticleStepJob {
     public final static int[][] moves = new int[][]{{0, 1}, {0, -1}, {1, 0}, {-1, 0}, {1, 1}, {-1, -1}, {-1, 1}, {1, -1}};
     private final int id, all;
     private int start, end;
@@ -15,8 +15,8 @@ public class CollisionJob {
     private volatile Cell[][] nextGrid;
     private volatile float delta;
     private final float maxDamp;
-
-    public CollisionJob(int id, int all) {
+    public ParticleStepJob(int id, int
+            all) {
         this.id = id;
         this.all = all;
         this.maxDamp = 0.8f;
@@ -34,7 +34,7 @@ public class CollisionJob {
             this.end = start + step;
     }
 
-    public void solveCollisions() {
+    public void stepParticles() {
         for (int row = 0; row < grid.length; row++) {
             for (int col = start; col < end; col++) {
                 Cell main = this.grid[row][col];

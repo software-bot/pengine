@@ -14,39 +14,36 @@ public class Solver {
     private final List<Particle> particles = new LinkedList<>();
     private final int subSteps;
     private Cell[][] currentGrid;
-    private final CollisionJob[] collisionJobs = new CollisionJob[threads * 3];
-    private final Subscriber[] collisionSubscribers = new Subscriber[threads];
-    private final LinkedBlockingQueue<CollisionJob> collisionPipeline = new LinkedBlockingQueue<>();
-    private final AtomicInteger responseCounter = new AtomicInteger(collisionJobs.length);
+    private final ParticleStepJob[] particleStepJobs = new ParticleStepJob[threads * 3];
+    private final Subscriber[] particleStepSubscribers = new Subscriber[threads];
+    private final LinkedBlockingQueue<ParticleStepJob> stepPipeline = new LinkedBlockingQueue<>();
+    private final AtomicInteger threadResponse = new AtomicInteger(particleStepJobs.length);
 
     public Solver(int subSteps) {
         this.subSteps = subSteps;
         this.currentGrid = freshGrid();
 
-        for (int i = 0; i < this.collisionJobs.length; i++) {
-            this.collisionJobs[i] = new CollisionJob(i, this.collisionJobs.length);
+        for (int i = 0; i < this.particleStepJobs.length; i++) {
+            this.particleStepJobs[i] = new ParticleStepJob(i, this.particleStepJobs.length);
         }
 
         for (int i = 0; i < threads; i++) {
-            this.collisionSubscribers[i] = new Subscriber(this.collisionPipeline, this.responseCounter);
-            new Thread(collisionSubscribers[i]).start();
+            this.particleStepSubscribers[i] = new Subscriber(this.stepPipeline, this.threadResponse);
+            new Thread(this.particleStepSubscribers[i]).start();
         }
     }
 
     public final void update() {
         float dt = delta / this.subSteps;
         for (int i = 1; i <= this.subSteps; i++) {
-            for (Particle p : particles) {
-                p.accelerate(GRAVITY);
-            }
             Cell[][] nextGrid = freshGrid();
-            while (this.responseCounter.get() < this.collisionJobs.length) {
-                //wait for all jobs to finish
+            while (this.threadResponse.get() < this.particleStepJobs.length) {
+                //Wait for all threads to finish solving collisions
             }
-            this.responseCounter.set(0);
-            for (CollisionJob collisionJob : this.collisionJobs) {
-                collisionJob.info(this.currentGrid, nextGrid, dt);
-                this.collisionPipeline.add(collisionJob);
+            this.threadResponse.set(0);
+            for (ParticleStepJob particleStepJob : this.particleStepJobs) {
+                particleStepJob.info(this.currentGrid, nextGrid, dt);
+                this.stepPipeline.add(particleStepJob);
             }
 
             this.currentGrid = nextGrid;
@@ -85,7 +82,7 @@ public class Solver {
     }
 
     public void dispose() {
-        for (Subscriber subscriber : this.collisionSubscribers) {
+        for (Subscriber subscriber : this.particleStepSubscribers) {
             subscriber.unsubscribe();
         }
     }

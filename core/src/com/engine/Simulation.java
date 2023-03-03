@@ -33,7 +33,7 @@ public class Simulation extends ApplicationAdapter implements InputProcessor {
         this.batch = new SpriteBatch();
         this.texture = new TriangleTextureProvider().provide();
         this.solver = new Solver(subSteps);
-        this.solver.addParticles(new LakeParticleProvider(20).provide());
+        this.solver.addParticles(new LakeParticleProvider(80).provide());
         Gdx.input.setInputProcessor(this);
         Executors.newSingleThreadExecutor().submit(this::displayMetadata);
     }
