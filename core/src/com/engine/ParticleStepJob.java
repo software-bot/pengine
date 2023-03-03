@@ -7,6 +7,8 @@ import com.engine.particle.Particle;
 
 import java.util.List;
 
+import static com.engine.Const.GRAVITY;
+
 public class ParticleStepJob {
     public final static int[][] moves = new int[][]{{0, 1}, {0, -1}, {1, 0}, {-1, 0}, {1, 1}, {-1, -1}, {-1, 1}, {1, -1}};
     private final int id, all;
@@ -34,22 +36,24 @@ public class ParticleStepJob {
             this.end = start + step;
     }
 
-    public void stepParticles() {
+    public void execute() {
         for (int row = 0; row < grid.length; row++) {
             for (int col = start; col < end; col++) {
                 Cell main = this.grid[row][col];
                 List<Particle> particleList = main.getParticles();
                 for (int i = 0; i < particleList.size(); i++) {
                     Particle p1 = particleList.get(i);
+                    p1.accelerate(GRAVITY);
                     step(p1, delta);
-                    addToGrid(p1, nextGrid);
+                    if (row == 0 || row == grid.length - 1 || col == 0 || col == grid[row].length - 1) {
+                        boundaryCollision(p1);
+                    }
                     for (int j = i + 1; j < particleList.size(); j++) {
                         collide(p1, particleList.get(j));
                     }
                     collideWithNeighbours(p1, row, col);
-                    if (row == 0 || row == grid.length - 1 || col == 0 || col == grid[row].length - 1) {
-                        boundaryCollision(p1);
-                    }
+
+                    addToGrid(p1, nextGrid);
                 }
             }
         }

@@ -20,7 +20,7 @@ public class Subscriber implements Runnable {
             try {
                 ParticleStepJob job = eventBus.poll(10, TimeUnit.SECONDS);
                 if (job != null) {
-                    job.stepParticles();
+                    job.execute();
                     this.responseCounter.incrementAndGet();
                 }
             } catch (InterruptedException e) {

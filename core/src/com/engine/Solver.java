@@ -38,7 +38,7 @@ public class Solver {
         for (int i = 1; i <= this.subSteps; i++) {
             Cell[][] nextGrid = freshGrid();
             while (this.threadResponse.get() < this.particleStepJobs.length) {
-                //Wait for all threads to finish solving collisions
+                //Wait for all threads to finish particle updates
             }
             this.threadResponse.set(0);
             for (ParticleStepJob particleStepJob : this.particleStepJobs) {

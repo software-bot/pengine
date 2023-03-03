@@ -33,7 +33,7 @@ public class Simulation extends ApplicationAdapter implements InputProcessor {
         this.batch = new SpriteBatch();
         this.texture = new TriangleTextureProvider().provide();
         this.solver = new Solver(subSteps);
-        this.solver.addParticles(new LakeParticleProvider(80).provide());
+        this.solver.addParticles(new LakeParticleProvider(50).provide());
         Gdx.input.setInputProcessor(this);
         Executors.newSingleThreadExecutor().submit(this::displayMetadata);
     }
@@ -105,16 +105,10 @@ public class Simulation extends ApplicationAdapter implements InputProcessor {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         Vector2 center = new Vector2(screenX, Gdx.graphics.getHeight() - screenY);
         List<Particle> particles = this.solver.getParticles();
-        if (button == 0) {
-            for (Particle p : particles) {
-                Vector2 acc = center.cpy().sub(p.getPosition()).setLength(10 / p.getPosition().dst(center));
-                p.getPrevPosition().add(acc.scl(-1));
-            }
-        } else if (button == 1)
-            for (Particle p : particles) {
-                Vector2 acc = center.cpy().sub(p.getPosition()).setLength(10 / p.getPosition().dst(center));
-                p.getPrevPosition().add(acc);
-            }
+        for (Particle p : particles) {
+            Vector2 acc = center.cpy().sub(p.getPosition()).setLength(10 / p.getPosition().dst(center));
+            p.getPrevPosition().add(acc.scl(button == 0 ? 1 : -1));
+        }
         return false;
     }
 

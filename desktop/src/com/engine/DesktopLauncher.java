@@ -9,7 +9,7 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
 		config.setTitle("Pengine");
-		config.setWindowedMode(1500, 1500);
+		config.setWindowedMode(1000, 1000);
 		new Lwjgl3Application(new Simulation(), config);
 	}
 }
